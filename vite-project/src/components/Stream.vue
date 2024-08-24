@@ -1,39 +1,52 @@
 <template>
   <div>
-    <video ref="videoPlayer" controls style="width: 100%;"></video>
+    <video ref="videoPlayer" controls style="width: 100%;">
+      <track kind="subtitles" :src="subtitlesUrl" srclang="fr" label="French" default>
+    </video>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
 import Hls from "hls.js";
 
-export default {
-  name: "VideoPlayer",
-  mounted() {
-    this.setupHls();
-  },
-  methods: {
-    setupHls() {
-      const video = this.$refs.videoPlayer;
+const videoPlayer = ref(null);
+const subtitlesUrl = ref("/api/subtitles.vtt");
 
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource("http://localhost:1172/stream.m3u8");
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play();
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = "http://localhost:1171/stream.m3u8";
-        video.addEventListener("loadedmetadata", () => {
-          video.play();
-        });
-      }
-    },
-  },
+const setupHls = () => {
+  const video = videoPlayer.value;
+
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource("/api/stream.m3u8");
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      video.play();
+    });
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = "/api/stream.m3u8";
+    video.addEventListener("loadedmetadata", () => {
+      video.play();
+    });
+  }
 };
-</script>
 
-<style scoped>
-/* Add any necessary styles here */
-</style>
+const setupSubtitles = () => {
+  const video = videoPlayer.value;
+  
+  setInterval(() => {
+    subtitlesUrl.value = `/api/subtitles.vtt?t=${Date.now()}`;
+    
+    setTimeout(() => {
+      if (video.textTracks[0]) {
+        video.textTracks[0].mode = 'showing';
+      }
+    }, 100);
+  }, 10000); // Reload every 10 seconds
+};
+
+onMounted(() => {
+  setupHls();
+  setupSubtitles();
+});
+</script>
