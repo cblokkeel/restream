@@ -1,0 +1,27 @@
+{
+    auto_https off
+}
+
+http://localhost:1171 {
+              root * /Users/cblokkeel/code/restream/hls
+    file_server
+    header Access-Control-Allow-Origin "*"
+    header Access-Control-Allow-Methods "GET, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type"
+}
+
+http://localhost:1172 {
+    root * /Users/cblokkeel/code/restream/stream_hls
+    file_server
+    header Access-Control-Allow-Origin "*"
+    header Access-Control-Allow-Methods "GET, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type"
+}
+
+http://localhost:1173 {
+    root * /Users/cblokkeel/code/restream
+    file_server
+    header Access-Control-Allow-Origin "*"
+    header Access-Control-Allow-Methods "GET, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type"
+}
